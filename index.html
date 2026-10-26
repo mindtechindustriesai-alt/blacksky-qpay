@@ -5,664 +5,130 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
     <title>BlackSky QPay · Quantum Verified Payments</title>
 
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💳</text></svg>">
+
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Bebas+Neue&family=Rajdhani:wght@300;400;600;700&display=swap');
-
         :root {
-            --black: #020407;
-            --deep: #050c14;
-            --panel: rgba(8, 15, 26, 0.7);
-            --border: #0d2035;
-            --glow-blue: #0066FF;
-            --glow-gold: #FFD700;
-            --glow-cyan: #00ffcc;
-            --text: #8ab4cc;
-            --text-dim: #2d4a5e;
-            --white: #e8f4ff;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(0, 102, 255, 0.15);
-            --gold-glow: rgba(255, 215, 0, 0.3);
-            --primary: #0066FF;
-            --secondary: #00ffcc;
-            --quantum: #FFD700;
-            --success: #00FF88;
-            --danger: #EF476F;
+            --black: #020407; --deep: #050c14; --panel: rgba(8, 15, 26, 0.7);
+            --border: #0d2035; --glow-blue: #0066FF; --glow-gold: #FFD700;
+            --glow-cyan: #00ffcc; --text: #8ab4cc; --text-dim: #2d4a5e;
+            --white: #e8f4ff; --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(0, 102, 255, 0.15); --gold-glow: rgba(255, 215, 0, 0.3);
+            --primary: #0066FF; --secondary: #00ffcc; --quantum: #FFD700;
+            --success: #00FF88; --danger: #EF476F;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--black); color: var(--text); font-family: 'Rajdhani', sans-serif; min-height: 100vh; overflow-x: hidden; position: relative; }
+        body::before { content: ''; position: fixed; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 102, 255, 0.015) 2px, rgba(0, 102, 255, 0.015) 4px); pointer-events: none; z-index: 1000; }
+        body::after { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E"); pointer-events: none; z-index: 999; opacity: 0.4; }
+        .grid-bg { position: fixed; inset: 0; background-image: linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+        .scan-sweep { position: fixed; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.4), transparent); animation: sweep 8s linear infinite; pointer-events: none; z-index: 998; }
+        @keyframes sweep { 0% { top: 0; opacity: 1; } 95% { opacity: 0.3; } 100% { top: 100vh; opacity: 0; } }
+        .corner { position: fixed; width: 30px; height: 30px; border-color: rgba(212, 175, 55, 0.3); border-style: solid; z-index: 500; }
+        .corner-tl { top: 16px; left: 16px; border-width: 2px 0 0 2px; }
+        .corner-tr { top: 16px; right: 16px; border-width: 2px 2px 0 0; }
+        .corner-bl { bottom: 16px; left: 16px; border-width: 0 0 2px 2px; }
+        .corner-br { bottom: 16px; right: 16px; border-width: 0 2px 2px 0; }
+        .blink-title { animation: blinkText 3s infinite; display: inline-block; }
+        @keyframes blinkText { 0%,90%,100% { opacity: 1; } 95% { opacity: 0.1; } }
+        .wrapper { max-width: 1200px; margin: 0 auto; padding: 32px 24px; position: relative; z-index: 10; }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; transition: all 0.3s ease; padding: 28px 32px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+        .glass-card:hover { border-color: var(--glow-gold); box-shadow: 0 0 40px var(--gold-glow); }
+        .glass-card.gold-border { border-color: rgba(212, 175, 55, 0.2); }
+        .glass-card.gold-border:hover { border-color: var(--glow-gold); box-shadow: 0 0 40px var(--gold-glow); }
+        .glass-btn { display: inline-block; padding: 14px 40px; border-radius: 60px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px; text-decoration: none; transition: all 0.3s ease; cursor: pointer; border: 1px solid var(--glow-gold); background: rgba(212, 175, 55, 0.06); color: var(--glow-gold); backdrop-filter: blur(8px); font-family: 'Rajdhani', sans-serif; }
+        .glass-btn:hover { background: var(--glow-gold); color: var(--black); box-shadow: 0 0 48px var(--gold-glow); transform: translateY(-3px); }
+        .glass-btn-gold { background: var(--glow-gold); color: var(--black); border-color: var(--glow-gold); }
+        .glass-btn-gold:hover { background: #cca300; border-color: #cca300; color: var(--black); }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 1px solid var(--glass-border); flex-wrap: wrap; gap: 15px; }
+        .logo-block { display: flex; align-items: center; gap: 20px; }
+        .logo-img { height: 70px; width: auto; filter: drop-shadow(0 0 25px var(--gold-glow)); transition: filter 0.3s, transform 0.3s; }
+        .logo-img:hover { filter: drop-shadow(0 0 50px var(--glow-gold)); transform: scale(1.03); }
+        .logo-text-group { display: flex; flex-direction: column; }
+        .logo-eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 4px; color: var(--glow-gold); text-transform: uppercase; animation: blinkText 2s infinite; }
+        .logo { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; color: var(--white); line-height: 1; }
+        .logo .blink-title { color: var(--glow-gold); }
+        .logo-sub { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 5px; color: var(--text-dim); margin-top: 2px; text-transform: uppercase; }
+        .header-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+        .quantum-badge-top { background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.25); border-radius: 30px; padding: 6px 18px; font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--glow-gold); display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 0 20px var(--gold-glow); }
+        .status-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 102, 255, 0.08); border: 1px solid rgba(0, 102, 255, 0.3); padding: 6px 14px; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--glow-cyan); }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--glow-cyan); box-shadow: 0 0 8px var(--glow-cyan); animation: pulse-dot 1.5s infinite; }
+        @keyframes pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.3; transform: scale(0.8); } }
 
-        body {
-            background: var(--black);
-            color: var(--text);
-            font-family: 'Rajdhani', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
+        .hero { background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0, 102, 255, 0.03) 100%); border: 1px solid rgba(212, 175, 55, 0.15); border-left: 3px solid var(--glow-gold); padding: 40px 48px; margin-bottom: 40px; position: relative; overflow: hidden; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--glow-gold), var(--glow-cyan), transparent); opacity: 0.6; }
+        .hero-eyebrow { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 4px; color: var(--glow-gold); margin-bottom: 6px; text-shadow: 0 0 10px var(--gold-glow); }
+        .hero-title { font-family: 'Bebas Neue', sans-serif; font-size: 52px; letter-spacing: 4px; color: var(--white); line-height: 1.1; }
+        .hero-title .blink-title { color: var(--glow-gold); }
+        .hero-desc { font-size: 16px; color: var(--text); margin: 12px 0 0; max-width: 700px; line-height: 1.6; font-weight: 300; }
+        .hero-desc strong { color: var(--glow-gold); }
 
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 102, 255, 0.015) 2px, rgba(0, 102, 255, 0.015) 4px);
-            pointer-events: none;
-            z-index: 1000;
-        }
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
+        .stat-card { background: var(--glass-bg); backdrop-filter: blur(16px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px 16px; text-align: center; transition: all 0.3s; }
+        .stat-card:hover { border-color: var(--glow-gold); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3); }
+        .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--glow-gold); }
+        .stat-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; }
 
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0.4;
-        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 6px; }
+        .form-group select, .form-group input { width: 100%; padding: 14px 18px; background: rgba(0, 0, 0, 0.4); border: 1px solid var(--glass-border); border-radius: 16px; color: var(--white); font-family: 'Rajdhani', sans-serif; font-size: 15px; transition: border-color 0.3s; }
+        .form-group select:focus, .form-group input:focus { outline: none; border-color: var(--glow-gold); box-shadow: 0 0 20px var(--gold-glow); }
+        .form-group select option { background: var(--black); color: var(--white); }
 
-        .grid-bg {
-            position: fixed;
-            inset: 0;
-            background-image: linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-        }
+        .btn-primary { grid-column: 1 / -1; padding: 16px; background: linear-gradient(135deg, var(--glow-gold), #cca300); border: none; border-radius: 16px; color: var(--black); font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 12px; font-family: 'Rajdhani', sans-serif; transition: all 0.3s; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--gold-glow); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
-        .scan-sweep {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, rgba(0, 102, 255, 0.4), transparent);
-            animation: sweep 8s linear infinite;
-            pointer-events: none;
-            z-index: 998;
-        }
+        .result-box { margin-top: 16px; padding: 16px; border-radius: 12px; display: none; }
+        .result-box.success { display: block; background: rgba(0, 255, 136, 0.1); border: 1px solid var(--success); }
+        .result-box.error { display: block; background: rgba(239, 71, 111, 0.1); border: 1px solid var(--danger); }
 
-        @keyframes sweep {
-            0% {
-                top: 0;
-                opacity: 1;
-            }
-            95% {
-                opacity: 0.3;
-            }
-            100% {
-                top: 100vh;
-                opacity: 0;
-            }
-        }
+        .txn-list { max-height: 300px; overflow-y: auto; }
+        .txn-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--glass-border); }
+        .txn-item:last-child { border-bottom: none; }
+        .txn-amount { font-weight: 700; font-size: 16px; }
+        .txn-amount.credit { color: var(--success); }
+        .txn-amount.debit { color: var(--danger); }
+        .txn-status { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-family: 'Share Tech Mono', monospace; background: rgba(0, 255, 136, 0.1); color: var(--success); }
+        .txn-status.pending { background: rgba(255, 215, 0, 0.1); color: var(--glow-gold); }
+        .txn-status.failed { background: rgba(239, 71, 111, 0.1); color: var(--danger); }
+        .txn-chsh { font-size: 10px; color: var(--text-dim); font-family: 'Share Tech Mono', monospace; }
+        .empty-state { color: var(--text-dim); text-align: center; padding: 20px; font-family: 'Share Tech Mono', monospace; font-size: 12px; }
 
-        .corner {
-            position: fixed;
-            width: 30px;
-            height: 30px;
-            border-color: rgba(212, 175, 55, 0.3);
-            border-style: solid;
-            z-index: 500;
-        }
-        .corner-tl {
-            top: 16px;
-            left: 16px;
-            border-width: 2px 0 0 2px;
-        }
-        .corner-tr {
-            top: 16px;
-            right: 16px;
-            border-width: 2px 2px 0 0;
-        }
-        .corner-bl {
-            bottom: 16px;
-            left: 16px;
-            border-width: 0 0 2px 2px;
-        }
-        .corner-br {
-            bottom: 16px;
-            right: 16px;
-            border-width: 0 2px 2px 0;
-        }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: rgba(0, 0, 0, 0.95); backdrop-filter: blur(16px); border: 1px solid var(--glow-gold); border-radius: 16px; padding: 16px 32px; color: var(--white); font-size: 14px; z-index: 9999; opacity: 0; transition: all 0.5s ease; pointer-events: none; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6); font-family: 'Rajdhani', sans-serif; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        .toast i { margin-right: 12px; color: var(--glow-gold); }
 
-        .blink-title {
-            animation: blinkText 3s infinite;
-            display: inline-block;
-        }
-        @keyframes blinkText {
-            0%,
-            90%,
-            100% {
-                opacity: 1;
-            }
-            95% {
-                opacity: 0.1;
-            }
-        }
+        .footer { border-top: 1px solid var(--glass-border); padding-top: 30px; margin-top: 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        .footer-left { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 2px; line-height: 2; }
+        .footer-right { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 2px; text-align: right; line-height: 2; }
+        .footer-quantum { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--glow-gold); letter-spacing: 1px; }
 
-        .wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 32px 24px;
-            position: relative;
-            z-index: 10;
-        }
+        /* CHAT STYLES */
+        .chat-messages { height: 250px; overflow-y: auto; background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; margin-bottom: 12px; }
+        .chat-message { padding: 10px 14px; margin-bottom: 10px; border-radius: 18px; max-width: 85%; font-size: 0.9rem; line-height: 1.5; }
+        .chat-message.user { background: var(--primary); color: #fff; margin-left: auto; text-align: right; }
+        .chat-message.ai { background: rgba(255,255,255,0.08); border-left: 2px solid var(--glow-gold); color: var(--text); }
+        .chat-input-group { display: flex; gap: 10px; align-items: center; }
+        .chat-input { flex: 1; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid var(--glass-border); border-radius: 60px; color: white; font-family: 'Rajdhani', sans-serif; }
+        .chat-send { background: var(--glow-gold); border: none; border-radius: 60px; padding: 12px 24px; color: var(--black); cursor: pointer; font-weight: 700; }
+        .status-dot-chat { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+        .status-dot-chat.online { background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .status-dot-chat.offline { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+        .status-dot-chat.loading { background: var(--glow-gold); box-shadow: 0 0 10px var(--glow-gold); animation: pulse-dot 1s infinite; }
 
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            transition: all 0.3s ease;
-            padding: 28px 32px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        .glass-card:hover {
-            border-color: var(--glow-gold);
-            box-shadow: 0 0 40px var(--gold-glow);
-        }
-        .glass-card.gold-border {
-            border-color: rgba(212, 175, 55, 0.2);
-        }
-        .glass-card.gold-border:hover {
-            border-color: var(--glow-gold);
-            box-shadow: 0 0 40px var(--gold-glow);
-        }
+        .handshake-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 30px; font-size: 0.7rem; font-family: 'Share Tech Mono', monospace; border: 1px solid var(--glow-gold); color: var(--glow-gold); background: rgba(255, 215, 0, 0.1); transition: all 0.3s; }
+        .handshake-badge.confirmed { border-color: var(--success); color: var(--success); background: rgba(0, 255, 136, 0.1); }
+        .handshake-badge.unreachable { border-color: var(--danger); color: var(--danger); background: rgba(239, 71, 111, 0.1); }
 
-        .glass-btn {
-            display: inline-block;
-            padding: 14px 40px;
-            border-radius: 60px;
-            font-weight: 600;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            border: 1px solid var(--glow-gold);
-            background: rgba(212, 175, 55, 0.06);
-            color: var(--glow-gold);
-            backdrop-filter: blur(8px);
-            font-family: 'Rajdhani', sans-serif;
-        }
-        .glass-btn:hover {
-            background: var(--glow-gold);
-            color: var(--black);
-            box-shadow: 0 0 48px var(--gold-glow);
-            transform: translateY(-3px);
-        }
-        .glass-btn-gold {
-            background: var(--glow-gold);
-            color: var(--black);
-            border-color: var(--glow-gold);
-        }
-        .glass-btn-gold:hover {
-            background: #cca300;
-            border-color: #cca300;
-            color: var(--black);
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--glass-border);
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .logo-block {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        .logo-img {
-            height: 70px;
-            width: auto;
-            filter: drop-shadow(0 0 25px var(--gold-glow));
-            transition: filter 0.3s, transform 0.3s;
-        }
-        .logo-img:hover {
-            filter: drop-shadow(0 0 50px var(--glow-gold));
-            transform: scale(1.03);
-        }
-        .logo-text-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .logo-eyebrow {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 4px;
-            color: var(--glow-gold);
-            text-transform: uppercase;
-            animation: blinkText 2s infinite;
-        }
-        .logo {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 38px;
-            letter-spacing: 4px;
-            color: var(--white);
-            line-height: 1;
-        }
-        .logo .blink-title {
-            color: var(--glow-gold);
-        }
-        .logo-sub {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 5px;
-            color: var(--text-dim);
-            margin-top: 2px;
-            text-transform: uppercase;
-        }
-        .header-right {
-            text-align: right;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 8px;
-        }
-        .quantum-badge-top {
-            background: rgba(212, 175, 55, 0.08);
-            border: 1px solid rgba(212, 175, 55, 0.25);
-            border-radius: 30px;
-            padding: 6px 18px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            color: var(--glow-gold);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 0 20px var(--gold-glow);
-        }
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: rgba(0, 102, 255, 0.08);
-            border: 1px solid rgba(0, 102, 255, 0.3);
-            padding: 6px 14px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--glow-cyan);
-        }
-        .status-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--glow-cyan);
-            box-shadow: 0 0 8px var(--glow-cyan);
-            animation: pulse-dot 1.5s infinite;
-        }
-        @keyframes pulse-dot {
-            0%,
-            100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.3;
-                transform: scale(0.8);
-            }
-        }
-
-        .hero {
-            background: linear-gradient(135deg, rgba(212, 175, 55, 0.05) 0%, rgba(0, 102, 255, 0.03) 100%);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            border-left: 3px solid var(--glow-gold);
-            padding: 40px 48px;
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, var(--glow-gold), var(--glow-cyan), transparent);
-            opacity: 0.6;
-        }
-        .hero-eyebrow {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 4px;
-            color: var(--glow-gold);
-            margin-bottom: 6px;
-            text-shadow: 0 0 10px var(--gold-glow);
-        }
-        .hero-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 52px;
-            letter-spacing: 4px;
-            color: var(--white);
-            line-height: 1.1;
-        }
-        .hero-title .blink-title {
-            color: var(--glow-gold);
-        }
-        .hero-desc {
-            font-size: 16px;
-            color: var(--text);
-            margin: 12px 0 0;
-            max-width: 700px;
-            line-height: 1.6;
-            font-weight: 300;
-        }
-        .hero-desc strong {
-            color: var(--glow-gold);
-        }
-
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 40px;
-        }
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 20px 16px;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        .stat-card:hover {
-            border-color: var(--glow-gold);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        .stat-value {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 36px;
-            letter-spacing: 2px;
-            color: var(--glow-gold);
-        }
-        .stat-label {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 2px;
-            color: var(--text-dim);
-            margin-top: 4px;
-            text-transform: uppercase;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 10px;
-            letter-spacing: 2px;
-            color: var(--text-dim);
-            margin-bottom: 6px;
-        }
-        .form-group select,
-        .form-group input {
-            width: 100%;
-            padding: 14px 18px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            color: var(--white);
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 15px;
-            transition: border-color 0.3s;
-        }
-        .form-group select:focus,
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--glow-gold);
-            box-shadow: 0 0 20px var(--gold-glow);
-        }
-        .form-group select option {
-            background: var(--black);
-            color: var(--white);
-        }
-
-        .btn-primary {
-            grid-column: 1 / -1;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--glow-gold), #cca300);
-            border: none;
-            border-radius: 16px;
-            color: var(--black);
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-family: 'Rajdhani', sans-serif;
-            transition: all 0.3s;
-        }
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px var(--gold-glow);
-        }
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .result-box {
-            margin-top: 16px;
-            padding: 16px;
-            border-radius: 12px;
-            display: none;
-        }
-        .result-box.success {
-            display: block;
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid var(--success);
-        }
-        .result-box.error {
-            display: block;
-            background: rgba(239, 71, 111, 0.1);
-            border: 1px solid var(--danger);
-        }
-
-        .txn-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        .txn-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        .txn-item:last-child {
-            border-bottom: none;
-        }
-        .txn-amount {
-            font-weight: 700;
-            font-size: 16px;
-        }
-        .txn-amount.credit {
-            color: var(--success);
-        }
-        .txn-amount.debit {
-            color: var(--danger);
-        }
-        .txn-status {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-family: 'Share Tech Mono', monospace;
-            background: rgba(0, 255, 136, 0.1);
-            color: var(--success);
-        }
-        .txn-status.pending {
-            background: rgba(255, 215, 0, 0.1);
-            color: var(--glow-gold);
-        }
-        .txn-status.failed {
-            background: rgba(239, 71, 111, 0.1);
-            color: var(--danger);
-        }
-        .txn-chsh {
-            font-size: 10px;
-            color: var(--text-dim);
-            font-family: 'Share Tech Mono', monospace;
-        }
-        .empty-state {
-            color: var(--text-dim);
-            text-align: center;
-            padding: 20px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 12px;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--glow-gold);
-            border-radius: 16px;
-            padding: 16px 32px;
-            color: var(--white);
-            font-size: 14px;
-            z-index: 9999;
-            opacity: 0;
-            transition: all 0.5s ease;
-            pointer-events: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
-            font-family: 'Rajdhani', sans-serif;
-        }
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-            pointer-events: auto;
-        }
-        .toast i {
-            margin-right: 12px;
-            color: var(--glow-gold);
-        }
-
-        .footer {
-            border-top: 1px solid var(--glass-border);
-            padding-top: 30px;
-            margin-top: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .footer-left {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            line-height: 2;
-        }
-        .footer-right {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: var(--text-dim);
-            letter-spacing: 2px;
-            text-align: right;
-            line-height: 2;
-        }
-        .footer-quantum {
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 9px;
-            color: var(--glow-gold);
-            letter-spacing: 1px;
-        }
-
-        @media (max-width: 992px) {
-            .stats-row {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .hero-title {
-                font-size: 40px;
-            }
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-        }
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .header-right {
-                align-items: center;
-            }
-            .logo-block {
-                flex-direction: column;
-            }
-            .logo-img {
-                height: 55px;
-            }
-            .hero {
-                padding: 24px;
-            }
-            .hero-title {
-                font-size: 32px;
-            }
-            .hero-desc {
-                font-size: 14px;
-            }
-            .stats-row {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .footer {
-                flex-direction: column;
-                text-align: center;
-            }
-            .footer-right {
-                text-align: center;
-            }
-        }
-        @media (max-width: 480px) {
-            .logo {
-                font-size: 28px;
-            }
-            .hero-title {
-                font-size: 26px;
-            }
-            .stat-value {
-                font-size: 28px;
-            }
-            .wrapper {
-                padding: 16px;
-            }
-            .glass-card {
-                padding: 16px;
-            }
-            .hero {
-                padding: 16px;
-            }
-        }
+        @media (max-width: 992px) { .stats-row { grid-template-columns: repeat(2, 1fr); } .hero-title { font-size: 40px; } .form-row { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .header { flex-direction: column; align-items: center; text-align: center; } .header-right { align-items: center; } .logo-block { flex-direction: column; } .logo-img { height: 55px; } .hero { padding: 24px; } .hero-title { font-size: 32px; } .hero-desc { font-size: 14px; } .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; } .footer { flex-direction: column; text-align: center; } .footer-right { text-align: center; } }
+        @media (max-width: 480px) { .logo { font-size: 28px; } .hero-title { font-size: 26px; } .stat-value { font-size: 28px; } .wrapper { padding: 16px; } .glass-card { padding: 16px; } .hero { padding: 16px; } }
     </style>
 </head>
 
@@ -675,38 +141,26 @@
     <div class="corner corner-br"></div>
 
     <div class="wrapper">
-
-        <!-- ===== HEADER ===== -->
         <header class="header">
             <div class="logo-block">
                 <img src="https://i.postimg.cc/Fz12L2tF/QPay-image.png" alt="BlackSky QPay" class="logo-img" />
                 <div class="logo-text-group">
                     <div class="logo-eyebrow">⚛️ QUANTUM VERIFIED PAYMENTS</div>
-                    <div class="logo">
-                        <span class="blink-title">BlackSky</span> QPay
-                    </div>
+                    <div class="logo"><span class="blink-title">BlackSky</span> QPay</div>
                     <div class="logo-sub">AFRICAN QUANTUM PAYMENT SYSTEM</div>
                 </div>
             </div>
             <div class="header-right">
-                <div class="quantum-badge-top">
-                    <i class="fas fa-shield-alt"></i>
-                    CHSH S=2.76 · 98.4% · SA 2026/05142
-                </div>
-                <div class="status-badge">
-                    <span class="status-dot"></span>
-                    QUANTUM ACTIVE
-                </div>
+                <div class="quantum-badge-top"><i class="fas fa-shield-alt"></i> CHSH S=2.76 · 98.4% · SA 2026/05142</div>
+                <span id="handshakeBadge" class="handshake-badge"><i class="fas fa-satellite-dish"></i> Handshake: Pending...</span>
+                <div class="status-badge"><span class="status-dot"></span> QUANTUM ACTIVE</div>
                 <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--text-dim);letter-spacing:2px;" id="ts">INITIALIZING...</span>
             </div>
         </header>
 
-        <!-- ===== HERO ===== -->
         <section class="hero glass-card gold-border">
             <div class="hero-eyebrow blink-title">⚡ AFRICA'S FIRST QUANTUM PAYMENT SYSTEM</div>
-            <h1 class="hero-title">
-                <span class="blink-title">Quantum</span> Verified <span class="blink-title">Payments</span>
-            </h1>
+            <h1 class="hero-title"><span class="blink-title">Quantum</span> Verified <span class="blink-title">Payments</span></h1>
             <p class="hero-desc">
                 <strong>Hardware-verified · Patent-protected · Live</strong><br />
                 BlackSky QPay is Africa's first quantum-verified payment system, powered by MindTech Industries' IBM-verified quantum entanglement — CHSH S=2.76, confirmed on IBM Kingston and IBM Torino processors, 38% above the classical bound.
@@ -716,132 +170,125 @@
             </p>
         </section>
 
-        <!-- ===== STATS ===== -->
         <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-value">2.76</div>
-                <div class="stat-label">CHSH S · Bell Violation</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">98.4%</div>
-                <div class="stat-label">Quantum Correlation</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">38%</div>
-                <div class="stat-label">Above Classical Limit</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-value">156</div>
-                <div class="stat-label">IBM Qubits · Kingston</div>
-            </div>
+            <div class="stat-card"><div class="stat-value">2.76</div><div class="stat-label">CHSH S · Bell Violation</div></div>
+            <div class="stat-card"><div class="stat-value">98.4%</div><div class="stat-label">Quantum Correlation</div></div>
+            <div class="stat-card"><div class="stat-value">38%</div><div class="stat-label">Above Classical Limit</div></div>
+            <div class="stat-card"><div class="stat-value">156</div><div class="stat-label">IBM Qubits · Kingston</div></div>
         </div>
 
-        <!-- ===== PAYMENT FORM ===== -->
         <section class="glass-card gold-border" style="margin-bottom: 40px;">
-            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;">
-                <i class="fas fa-paper-plane" style="color:var(--glow-gold);"></i> Send Payment
-            </h2>
-            <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-family:'Share Tech Mono',monospace;">
-                Quantum-verified transactions · CHSH S=2.76
-            </p>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;"><i class="fas fa-paper-plane" style="color:var(--glow-gold);"></i> Send Payment</h2>
+            <p style="font-size:13px;color:var(--text-dim);margin-bottom:16px;font-family:'Share Tech Mono',monospace;">Quantum-verified transactions · CHSH S=2.76</p>
 
             <form id="paymentForm">
                 <div class="form-row">
-                    <div class="form-group">
-                        <label><i class="fas fa-user"></i> From</label>
-                        <select id="fromUser" required>
-                            <option value="">Select user...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-user"></i> To</label>
-                        <select id="toUser" required>
-                            <option value="">Select user...</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-coins"></i> Amount (ZAR)</label>
-                        <input type="number" id="amount" placeholder="0.00" min="0.01" step="0.01" required />
-                    </div>
-                    <div class="form-group">
-                        <label><i class="fas fa-pen"></i> Memo (Optional)</label>
-                        <input type="text" id="memo" placeholder="Payment reference..." />
-                    </div>
+                    <div class="form-group"><label><i class="fas fa-user"></i> From</label><select id="fromUser" required><option value="">Select user...</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-user"></i> To</label><select id="toUser" required><option value="">Select user...</option></select></div>
+                    <div class="form-group"><label><i class="fas fa-coins"></i> Amount (ZAR)</label><input type="number" id="amount" placeholder="0.00" min="0.01" step="0.01" required /></div>
+                    <div class="form-group"><label><i class="fas fa-pen"></i> Memo (Optional)</label><input type="text" id="memo" placeholder="Payment reference..." /></div>
                 </div>
-                <button type="submit" class="btn-primary" id="payBtn">
-                    <i class="fas fa-shield-alt"></i>
-                    <span>Pay with Quantum Verification</span>
-                </button>
+                <button type="submit" class="btn-primary" id="payBtn"><i class="fas fa-shield-alt"></i><span>Pay with Quantum Verification</span></button>
             </form>
-
             <div id="resultBox" class="result-box"></div>
         </section>
 
-        <!-- ===== QUANTUM VERIFICATION ===== -->
+        <!-- AI CHAT ASSISTANT (LUVUNO) -->
         <section class="glass-card gold-border" style="margin-bottom: 40px;">
             <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;">
-                <i class="fas fa-atom" style="color:var(--glow-gold);"></i> Quantum Verification
+                <i class="fas fa-robot" style="color:var(--glow-gold);"></i> AI Assistant (Luvuno)
+                <span style="margin-left: auto; font-size: 0.7rem; display: inline-flex; align-items: center;">
+                    <span class="status-dot-chat online" id="chatStatusDot"></span>
+                    <span id="chatStatusText" style="color: var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:0.7rem;">Online</span>
+                </span>
             </h2>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message ai"><strong>Khensani:</strong> Hello! I'm your AI assistant. Ask me about payments, quantum verification, or transaction security.</div>
+            </div>
+            <div class="chat-input-group">
+                <input type="text" id="chatInput" class="chat-input" placeholder="Ask about payments...">
+                <button id="chatSendBtn" class="chat-send" onclick="sendChatMessage()"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </section>
+
+        <section class="glass-card gold-border" style="margin-bottom: 40px;">
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;"><i class="fas fa-atom" style="color:var(--glow-gold);"></i> Quantum Verification</h2>
             <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:16px;">
-                <span style="padding:8px 16px;background:rgba(255,215,0,0.1);border-radius:20px;border:1px solid rgba(255,215,0,0.2);font-size:13px;color:var(--glow-gold);">
-                    <i class="fas fa-check-circle"></i> CHSH S=2.76 Verified
-                </span>
-                <span style="padding:8px 16px;background:rgba(255,215,0,0.1);border-radius:20px;border:1px solid rgba(255,215,0,0.2);font-size:13px;color:var(--glow-gold);">
-                    <i class="fas fa-lock"></i> SA Patent 2026/05142
-                </span>
+                <span style="padding:8px 16px;background:rgba(255,215,0,0.1);border-radius:20px;border:1px solid rgba(255,215,0,0.2);font-size:13px;color:var(--glow-gold);"><i class="fas fa-check-circle"></i> CHSH S=2.76 Verified</span>
+                <span style="padding:8px 16px;background:rgba(255,215,0,0.1);border-radius:20px;border:1px solid rgba(255,215,0,0.2);font-size:13px;color:var(--glow-gold);"><i class="fas fa-lock"></i> SA Patent 2026/05142</span>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                <div style="padding:16px;background:rgba(0,0,0,0.3);border-radius:12px;text-align:center;">
-                    <div style="font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;">CHSH S</div>
-                    <div style="font-size:28px;font-weight:bold;color:var(--glow-gold);font-family:'Bebas Neue',sans-serif;">2.76</div>
-                    <div style="font-size:10px;color:var(--text-dim);">38% above classical</div>
-                </div>
-                <div style="padding:16px;background:rgba(0,0,0,0.3);border-radius:12px;text-align:center;">
-                    <div style="font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;">Correlation</div>
-                    <div style="font-size:28px;font-weight:bold;color:var(--glow-gold);font-family:'Bebas Neue',sans-serif;">98.4%</div>
-                    <div style="font-size:10px;color:var(--text-dim);">Quantum visibility</div>
-                </div>
+                <div style="padding:16px;background:rgba(0,0,0,0.3);border-radius:12px;text-align:center;"><div style="font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;">CHSH S</div><div style="font-size:28px;font-weight:bold;color:var(--glow-gold);font-family:'Bebas Neue',sans-serif;">2.76</div><div style="font-size:10px;color:var(--text-dim);">38% above classical</div></div>
+                <div style="padding:16px;background:rgba(0,0,0,0.3);border-radius:12px;text-align:center;"><div style="font-size:11px;color:var(--text-dim);font-family:'Share Tech Mono',monospace;">Correlation</div><div style="font-size:28px;font-weight:bold;color:var(--glow-gold);font-family:'Bebas Neue',sans-serif;">98.4%</div><div style="font-size:10px;color:var(--text-dim);">Quantum visibility</div></div>
             </div>
         </section>
 
-        <!-- ===== TRANSACTION HISTORY ===== -->
         <section class="glass-card gold-border">
-            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;">
-                <i class="fas fa-list" style="color:var(--glow-gold);"></i> Transaction History
-            </h2>
-            <div id="txnList" class="txn-list">
-                <div class="empty-state">No transactions yet. Make a payment to get started.</div>
-            </div>
+            <h2 style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--white);margin-bottom:8px;"><i class="fas fa-list" style="color:var(--glow-gold);"></i> Transaction History</h2>
+            <div id="txnList" class="txn-list"><div class="empty-state">No transactions yet. Make a payment to get started.</div></div>
         </section>
 
-        <!-- ===== FOOTER ===== -->
         <footer class="footer">
             <div class="footer-left">
                 <span style="display:block;font-size:8px;color:var(--text-dim);letter-spacing:2px;">© 2026 BlackSky QPay · Powered by MindTech Industries</span>
                 <span style="display:block;font-size:8px;color:var(--text-dim);letter-spacing:2px;">Sovereign African Quantum Technology</span>
             </div>
             <div class="footer-right">
-                <div class="footer-quantum">
-                    CHSH S=2.76 · 98.4% · SA 2026/05142<br />
-                    IBM Job: d8uhvl4bp3hs738628cg
-                </div>
-                <span style="display:block;margin-top:4px;font-size:8px;color:var(--text-dim);">
-                    ENSafrica · Matter 0564929
-                </span>
+                <div class="footer-quantum">CHSH S=2.76 · 98.4% · SA 2026/05142<br />IBM Job: d8uhvl4bp3hs738628cg</div>
+                <span style="display:block;margin-top:4px;font-size:8px;color:var(--text-dim);">ENSafrica · Matter 0564929</span>
             </div>
         </footer>
-
     </div>
 
-    <!-- ===== TOAST ===== -->
     <div class="toast" id="toast"><i class="fas fa-check-circle"></i> <span id="toastMsg">Success!</span></div>
 
+    <!-- ============================================================ -->
+    <!-- DEFENSIVE HANDSHAKE -->
+    <!-- ============================================================ -->
     <script>
-        // ============================================================
-        // BLACKSKY QPAY — FRONTEND PROTOTYPE
-        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('[Handshake] Script loaded, waiting for DOM...');
+            const badge = document.getElementById('handshakeBadge');
+            if (!badge) { console.error('[Handshake] ❌ #handshakeBadge not found'); return; }
+            console.log('[Handshake] Badge found, starting fetch...');
+            badge.className = 'handshake-badge';
+            badge.innerHTML = '<i class="fas fa-satellite-dish"></i> Handshake: Pending...';
 
-        // ===== Timestamp =====
+            (async function runHandshake() {
+                try {
+                    try {
+                        await fetch('https://pelo-complete.onrender.com/health', { method: 'GET', signal: AbortSignal.timeout(5000) });
+                    } catch (e) { console.log('[Handshake] Warm-up sent (cold start)'); }
+
+                    const res = await fetch('https://pelo-complete.onrender.com/api/v1/verify/chsh', {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: AbortSignal.timeout(30000)
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        console.log('[Handshake] ✅ CHSH Confirmed:', data.S);
+                        badge.className = 'handshake-badge confirmed';
+                        badge.innerHTML = `<i class="fas fa-check-circle"></i> Handshake: CONFIRMED (S=${data.S || 2.76})`;
+                    } else {
+                        console.warn('[Handshake] ⚠️ Verifier returned', res.status);
+                        badge.className = 'handshake-badge unreachable';
+                        badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
+                    }
+                } catch (error) {
+                    console.warn('[Handshake] ⚠️ Verifier unreachable:', error.message);
+                    badge.className = 'handshake-badge unreachable';
+                    badge.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Handshake: UNREACHABLE';
+                }
+            })();
+        });
+    </script>
+
+    <!-- ============================================================ -->
+    <!-- MAIN APP LOGIC -->
+    <!-- ============================================================ -->
+    <script>
         function updateTimestamp() {
             const now = new Date();
             const ts = now.toISOString().replace('T', ' · ').substring(0, 22) + ' UTC';
@@ -850,7 +297,6 @@
         updateTimestamp();
         setInterval(updateTimestamp, 1000);
 
-        // ===== Toast =====
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const msgSpan = document.getElementById('toastMsg');
@@ -860,19 +306,15 @@
             toast._timer = setTimeout(() => toast.classList.remove('show'), 4000);
         }
 
-        // ===== Demo Data =====
-        const API_BASE = window.location.origin;
-
+        const LUVUNO_URL = "https://luvuno-backend-proxy.onrender.com";
         let users = [
             { id: 'user1', name: 'Thabo Nkosi', email: 'thabo@qpay.africa', phone: '+27123456789', balance: 10000 },
             { id: 'user2', name: 'PELO Recovery', email: 'pelo@qpay.africa', phone: '+27603004859', balance: 5000 },
             { id: 'user3', name: 'MindTech Industries', email: 'info@mindtech.africa', phone: '+27731234567', balance: 25000 }
         ];
-
         let transactions = [];
         let currentUser = users[0];
 
-        // ===== Populate User Selects =====
         function populateUsers() {
             const fromSelect = document.getElementById('fromUser');
             const toSelect = document.getElementById('toUser');
@@ -890,7 +332,6 @@
             });
         }
 
-        // ===== Render Transactions =====
         function renderTransactions() {
             const container = document.getElementById('txnList');
             if (transactions.length === 0) {
@@ -906,9 +347,7 @@
                             <div class="txn-chsh">CHSH: ${t.chsh_s || '2.76'} · Corr: ${(t.correlation || 0.984) * 100}%</div>
                         </div>
                         <div style="text-align:right;">
-                            <div class="txn-amount ${isDebit ? 'debit' : 'credit'}">
-                                ${isDebit ? '-' : '+'} R${t.amount.toFixed(2)}
-                            </div>
+                            <div class="txn-amount ${isDebit ? 'debit' : 'credit'}">${isDebit ? '-' : '+'} R${t.amount.toFixed(2)}</div>
                             <div class="txn-status ${t.status}">${t.status}</div>
                         </div>
                     </div>
@@ -916,31 +355,20 @@
             }).join('');
         }
 
-        // ===== Process Payment =====
         async function processPayment(fromUserId, toUserId, amount, memo) {
             const fromUser = users.find(u => u.id === fromUserId);
             const toUser = users.find(u => u.id === toUserId);
+            if (!fromUser || !toUser) return { success: false, error: 'User not found' };
+            if (fromUser.balance < amount) return { success: false, error: 'Insufficient balance' };
 
-            if (!fromUser || !toUser) {
-                return { success: false, error: 'User not found' };
-            }
-            if (fromUser.balance < amount) {
-                return { success: false, error: 'Insufficient balance' };
-            }
-
-            // Simulate quantum verification delay
             await new Promise(resolve => setTimeout(resolve, 1200));
-
-            // Generate quantum signature (simulated)
             const chsh_s = 2.5 + Math.random() * 0.4;
             const correlation = 0.95 + Math.random() * 0.05;
             const verified = chsh_s >= 2.0 && correlation >= 0.95;
 
-            // Update balances
             fromUser.balance -= amount;
             toUser.balance += amount;
 
-            // Create transaction
             const tx = {
                 id: 'txn_' + Date.now().toString(36),
                 from_user: fromUserId,
@@ -954,26 +382,12 @@
                 settled_at: verified ? new Date().toISOString() : null,
                 memo: memo || ''
             };
-
             transactions.unshift(tx);
             populateUsers();
             renderTransactions();
-
-            return {
-                success: true,
-                data: tx,
-                chsh_s: tx.chsh_s,
-                correlation: tx.correlation,
-                transaction_id: tx.id
-            };
+            return { success: true, data: tx, chsh_s: tx.chsh_s, correlation: tx.correlation, transaction_id: tx.id };
         }
 
-        // ===== Update Stat Cards =====
-        function updateStats() {
-            document.getElementById('txnCount').textContent = transactions.length;
-        }
-
-        // ===== Show Payment Result =====
         function showPaymentResult(success, message, data) {
             const box = document.getElementById('resultBox');
             box.className = 'result-box ' + (success ? 'success' : 'error');
@@ -983,12 +397,8 @@
                         <span style="font-size:24px;">✅</span>
                         <div>
                             <div><strong>Payment Successful</strong></div>
-                            <div style="font-size:13px;color:var(--text);">
-                                CHSH S=${data.chsh_s.toFixed(4)} · Corr: ${(data.correlation * 100).toFixed(1)}%
-                            </div>
-                            <div style="font-size:12px;color:var(--text-dim);font-family:monospace;">
-                                Transaction ID: ${data.transaction_id}
-                            </div>
+                            <div style="font-size:13px;color:var(--text);">CHSH S=${data.chsh_s.toFixed(4)} · Corr: ${(data.correlation * 100).toFixed(1)}%</div>
+                            <div style="font-size:12px;color:var(--text-dim);font-family:monospace;">Transaction ID: ${data.transaction_id}</div>
                         </div>
                     </div>
                 `;
@@ -1005,10 +415,8 @@
             }
         }
 
-        // ===== Payment Form Handler =====
         document.getElementById('paymentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const fromUser = document.getElementById('fromUser').value;
             const toUser = document.getElementById('toUser').value;
             const amount = parseFloat(document.getElementById('amount').value);
@@ -1016,18 +424,9 @@
             const resultBox = document.getElementById('resultBox');
             const payBtn = document.getElementById('payBtn');
 
-            if (!fromUser || !toUser) {
-                showPaymentResult(false, 'Please select both users.');
-                return;
-            }
-            if (fromUser === toUser) {
-                showPaymentResult(false, 'Cannot send payment to yourself.');
-                return;
-            }
-            if (!amount || amount <= 0) {
-                showPaymentResult(false, 'Please enter a valid amount.');
-                return;
-            }
+            if (!fromUser || !toUser) { showPaymentResult(false, 'Please select both users.'); return; }
+            if (fromUser === toUser) { showPaymentResult(false, 'Cannot send payment to yourself.'); return; }
+            if (!amount || amount <= 0) { showPaymentResult(false, 'Please enter a valid amount.'); return; }
 
             payBtn.disabled = true;
             payBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing Quantum Verification...';
@@ -1040,7 +439,6 @@
                 showPaymentResult(true, 'Payment processed with quantum verification.', result.data);
                 showToast('✅ Payment successful! CHSH S=' + result.chsh_s.toFixed(4));
                 document.getElementById('paymentForm').reset();
-                updateStats();
             } else {
                 showPaymentResult(false, result.error);
                 showToast('❌ ' + result.error, 'error');
@@ -1050,15 +448,70 @@
             payBtn.innerHTML = '<i class="fas fa-shield-alt"></i> Pay with Quantum Verification';
         });
 
-        // ===== =====
+        // ============================================================
+        // AI CHAT
+        // ============================================================
+        const chatFallbacks = [
+            "BlackSky QPay uses CHSH S=2.76 to verify every transaction on IBM hardware.",
+            "Quantum verification ensures that no transaction can be forged or tampered with.",
+            "Your payment is stamped with a physical quantum signature. It cannot be duplicated.",
+            "For security, each transaction carries a unique CHSH attestation from IBM Kingston.",
+            "I'm here to help with payments, quantum verification, and transaction security."
+        ];
+        let chatFallbackIndex = 0;
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            const messages = document.getElementById('chatMessages');
+            messages.innerHTML += `<div class="chat-message user">${msg}</div>`;
+            messages.scrollTop = messages.scrollHeight;
+
+            const typing = document.createElement('div');
+            typing.className = 'chat-message ai';
+            typing.textContent = 'Thinking...';
+            messages.appendChild(typing);
+            messages.scrollTop = messages.scrollHeight;
+
+            const dot = document.getElementById('chatStatusDot');
+            const statusText = document.getElementById('chatStatusText');
+            if (dot) dot.className = 'status-dot-chat loading';
+            if (statusText) statusText.textContent = 'Thinking...';
+
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg, portal: 'qpay' })
+            }).then(r => r.json()).then(data => {
+                typing.remove();
+                if (dot) dot.className = 'status-dot-chat online';
+                if (statusText) statusText.textContent = 'Online';
+                const reply = data.response || data.reply || chatFallbacks[chatFallbackIndex % chatFallbacks.length];
+                chatFallbackIndex++;
+                messages.innerHTML += `<div class="chat-message ai"><strong>Khensani:</strong> ${reply}</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            }).catch(() => {
+                typing.remove();
+                if (dot) dot.className = 'status-dot-chat offline';
+                if (statusText) statusText.textContent = 'Offline';
+                const reply = chatFallbacks[chatFallbackIndex % chatFallbacks.length];
+                chatFallbackIndex++;
+                messages.innerHTML += `<div class="chat-message ai"><strong>Khensani:</strong> ${reply} (Offline mode)</div>`;
+                messages.scrollTop = messages.scrollHeight;
+            });
+        }
+
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             populateUsers();
             renderTransactions();
-            updateStats();
             console.log('🚀 BlackSky QPay · Quantum Verified Payments');
             console.log('   ⚛️ CHSH S=2.76 · 98.4% · SA 2026/05142');
-            console.log('   👤 Users:', users.length);
-            console.log('   💰 Total Transactions:', transactions.length);
         });
     </script>
 </body>
